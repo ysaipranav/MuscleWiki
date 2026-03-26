@@ -1,0 +1,9 @@
+# API server
+Flask==2.2.3
+
+# Scraper (muscleWiki.py)
+requests==2.31.0
+beautifulsoup4==4.12.3
+
+# Data utilities (utils.py)
+pandas==2.2.2
