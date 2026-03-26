@@ -39,6 +39,7 @@ targets:
       - framework: AVFoundation.framework
       - framework: WebKit.framework
       - framework: CoreSpotlight.framework
+      - framework: Network.framework
 
   MuscleWikiAppTests:
     type: bundle.unit-test

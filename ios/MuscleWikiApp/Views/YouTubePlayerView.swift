@@ -27,10 +27,12 @@ struct YouTubePlayerView: UIViewRepresentable {
 struct YouTubeSection: View {
     let embedURL: String
     @State private var isExpanded = false
+    @State private var networkMonitor = NetworkMonitor.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Button {
+                guard networkMonitor.isConnected else { return }
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isExpanded.toggle()
                 }
@@ -38,22 +40,36 @@ struct YouTubeSection: View {
                 HStack {
                     Label("Full Tutorial", systemImage: "play.rectangle.fill")
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(networkMonitor.isConnected ? .primary : .secondary)
                     Spacer()
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if networkMonitor.isConnected {
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Label("Offline", systemImage: "wifi.slash")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(isExpanded ? "Collapse tutorial video" : "Expand tutorial video")
+            .disabled(!networkMonitor.isConnected)
+            .accessibilityLabel(
+                networkMonitor.isConnected
+                    ? (isExpanded ? "Collapse tutorial video" : "Expand tutorial video")
+                    : "Tutorial video unavailable offline"
+            )
 
-            if isExpanded {
+            if isExpanded && networkMonitor.isConnected {
                 YouTubePlayerView(embedURL: embedURL)
                     .aspectRatio(16 / 9, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .transition(.opacity.combined(with: .scale(scale: 0.97)))
             }
+        }
+        .onChange(of: networkMonitor.isConnected) { _, connected in
+            if !connected { isExpanded = false }
         }
     }
 }
