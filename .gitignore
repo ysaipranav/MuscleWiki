@@ -1,4 +1,50 @@
+# ── Vercel ────────────────────────────────────────────────────────────────────
 .vercel
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
 .env
-venv
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# ── Xcode / Swift ─────────────────────────────────────────────────────────────
+*.xcworkspace
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcarchive
+Pods/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo

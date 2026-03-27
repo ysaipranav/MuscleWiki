@@ -1,42 +1,127 @@
-# Unofficial MuscleWiki API
-This is an API to retreive data from [musclewiki](https://musclewiki.com/). It was created by scraping data from [musclewiki](https://musclewiki.com/).
+# MuscleWiki
 
-The API provides information about exercises, including the name, category, target muscles,instructions for performing the exercise and a short video demonstration.
+An unofficial exercise database built from [musclewiki.com](https://musclewiki.com/), available as both a **native iOS app** and a **REST API**.
 
-## Endpoints
-The API provides the following endpoints:
+- **954 exercises** with videos, step-by-step instructions, muscle targets, and difficulty ratings
+- **100% offline iOS app** — all data is bundled; no network required to browse
+- **REST API** deployed on Vercel for third-party integrations
 
-### Get workout attributes
-This endpoint returns the workout attributes you can filter exercises by.
-```
-GET /attributes
-```
+---
 
-### Get all exercises
-
-This endpoint returns a list of all exercises.
+## Repository Structure
 
 ```
-GET /exercises
-GET /exercises?target=<target>&name=<name>&category=<category>
+MuscleWiki/
+├── backend/                  # Python REST API + data scraper
+│   ├── api.py                # Flask API server
+│   ├── muscleWiki.py         # One-time web scraper
+│   ├── utils.py              # JSON → CSV converter
+│   ├── requirements.txt      # Python dependencies
+│   └── data/
+│       ├── workout-data.json          # 954 exercises (source of truth)
+│       ├── workout-attributes.json    # Filter options
+│       └── workout-data.csv           # CSV export
+├── ios/                      # Native iOS app (Swift 6 / SwiftUI)
+│   ├── project.yml           # XcodeGen project spec
+│   ├── MuscleWikiApp/        # App source
+│   ├── MuscleWikiAppTests/   # Unit tests
+│   └── MuscleWikiAppUITests/ # UI tests
+├── vercel.json               # Vercel deployment config
+└── .gitignore
 ```
 
-### Get exercise by ID
-This endpoint returns a single exercise with the given ID.
+---
+
+## iOS App
+
+A fully offline SwiftUI app targeting **iOS 17+**, built with **Swift 6** and the latest Apple frameworks.
+
+### Key Features
+
+| Feature | Implementation |
+|---|---|
+| Browse 954 exercises | `ExerciseListView` with `.searchable` + lazy `List` |
+| Filter by category, difficulty, force, muscle | `FilterView` bottom sheet, multi-select |
+| Browse by muscle group | Interactive `MuscleMapView` grid with exercise counts |
+| Exercise details | Steps, muscle targets, difficulty/category badges |
+| Demo videos | Inline `AVPlayer` (front + side angle, looping) |
+| Full tutorials | YouTube embed via `WKWebView` |
+| Favorites | `SwiftData` persistence, swipe-to-delete |
+| Offline support | `NWPathMonitor` banner; videos degrade gracefully |
+| Home screen search | `CoreSpotlight` indexing of all exercises |
+| Accessibility | Full VoiceOver labels, Dynamic Type |
+
+### Quick Start
+
+```bash
+# Install XcodeGen (requires Homebrew)
+brew install xcodegen
+
+# Generate the Xcode project
+cd ios
+xcodegen generate
+
+# Open in Xcode
+open MuscleWikiApp.xcodeproj
 ```
-GET /exercises/int:exercise_id
+
+Requirements: **Xcode 16+**, **iOS 17+ device or simulator**
+
+See [`ios/README.md`](ios/README.md) for full setup and architecture documentation.
+
+---
+
+## REST API
+
+A lightweight Flask API deployed serverlessly on Vercel, serving the same exercise dataset.
+
+**Base URL:** `https://workoutapi.vercel.app`
+
+### Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/` | Health check |
+| `GET` | `/exercises` | List all exercises (supports filters) |
+| `GET` | `/exercises/<id>` | Get a single exercise by ID |
+| `GET` | `/exercises/attributes` | Available filter values |
+
+### Filter Parameters
+
+`GET /exercises?muscle=Biceps&category=Barbell&difficulty=Beginner&force=Pull&name=curl`
+
+| Parameter | Example values |
+|---|---|
+| `muscle` | `Biceps`, `Chest`, `Quads`, `Glutes`, … |
+| `category` | `Barbell`, `Dumbbells`, `Bodyweight`, `Cables`, … |
+| `difficulty` | `Beginner`, `Intermediate`, `Advanced` |
+| `force` | `Push`, `Pull`, `Hold` |
+| `name` | any substring of the exercise name |
+
+See [`backend/README.md`](backend/README.md) for local development, scraper usage, and deployment instructions.
+
+---
+
+## Data Flow
+
+```
+musclewiki.com
+      │
+      ▼
+backend/muscleWiki.py   ← run once to refresh data
+      │
+      ▼
+backend/data/
+  workout-data.json          ─────────────────────────┐
+  workout-attributes.json    ─────────────────────────┤
+      │                                               │
+      ▼                                               ▼
+backend/api.py              ios/MuscleWikiApp/Resources/
+(Vercel REST API)           (bundled in app — offline)
 ```
 
-## Deployment
-This API has been deployed to Vercel at `https://workoutapi.vercel.app/`. To deploy the API to your own Vercel account, follow these steps:
+---
 
-1. Clone the repository to your local machine.
-2. Install the Vercel CLI by running `npm install -g vercel`.
-3. Run `vercel login` to log in to your Vercel account.
-4. Run `vercel init` to initialize your project for deployment to Vercel.
-5. Follow the prompts to configure your project for deployment.
-6. Run `vercel` followed by `vercel --prod` to deploy your project to Vercel.
+## License
 
-## API Documentation
-Full API documentation, including detailed descriptions of the endpoints and response formats, can be found on [RapidAPI](https://rapidapi.com/rahulbanerjee26/api/musclewiki).
-
+Data sourced from [musclewiki.com](https://musclewiki.com/). This project is unofficial and not affiliated with MuscleWiki.
